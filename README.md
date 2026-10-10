@@ -1,31 +1,51 @@
 # Go REST API Boilerplate
 
-A small, dependency-free starting point for production Go HTTP APIs.
+A production-minded Go REST API starter organised using the same application pattern as the Gym Tracker API.
 
 ## Included
 
-- Go 1.25 `net/http` routing
-- JSON responses and versioned routes
-- Structured request logging, request IDs, panic recovery, and timeouts
-- Graceful shutdown and environment-based configuration
-- Unit tests, race detection, vet, GitHub Actions, Docker, and MIT license
+- Flat `cmd/api` package for configuration, routes, handlers, middleware, helpers, and errors
+- `internal/data` PostgreSQL model layer and `internal/validator`
+- Complete example CRUD resource with optimistic versioning
+- Versioned SQL migrations
+- Structured logging, panic recovery, CORS, request limits, timeouts, and graceful shutdown
+- Docker, Make targets, race-tested CI, vet, and an MIT license
 
-## Run
+## Project layout
+
+```text
+cmd/api/            server entry point, routes, handlers, middleware
+internal/data/      database models and queries
+internal/validator/ reusable validation helpers
+migrations/         versioned PostgreSQL migrations
+```
+
+## Quick start
 
 ```sh
 cp .env.example .env
-go run ./cmd/api
-curl http://localhost:8080/health
-curl http://localhost:8080/api/v1/hello/world
+createdb app
+export DATABASE_URL='postgres://postgres:postgres@localhost:5432/app?sslmode=disable'
+make migrations/up
+make run
 ```
 
-## Commands
+Try the API:
 
 ```sh
-make run
+curl http://localhost:8080/v1/healthcheck
+curl -X POST http://localhost:8080/v1/items \
+  -H 'Content-Type: application/json' \
+  -d '{"name":"Example","description":"Replace this resource with your own"}'
+```
+
+## Development
+
+```sh
 make test
 make lint
 make build
+make migrations/new NAME=create_users_table
 ```
 
-Rename the module in `go.mod`, then add domain packages under `internal/` as the application grows.
+Rename the module in `go.mod`, replace the example `Item` resource, and add the authentication or other infrastructure required by your application.
